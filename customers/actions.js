@@ -78,9 +78,9 @@ getSpecificCustomer = async(req,res,next) => {
 
 
 createCustomerQuery = (customer) => {
-    const query = 'INSERT INTO customers (First_name,Last_name,Birth_date,Address,City) VALUES (?,?,?,?,?)';
+    const query = 'INSERT INTO customers (First_name,Last_name,Birth_date,Phone,Address,City) VALUES (?,?,?,?,?,?)';
     return new Promise((resolve, reject) => {
-        con.query(query,[customer.First_name,customer.Last_name,customer.Birth_date,customer.Address,customer.City], (error, results, fields) => {
+        con.query(query,[customer.First_name,customer.Last_name,customer.Birth_date,customer.Phone,customer.Address,customer.City], (error, results, fields) => {
             if (error) {
                 reject(error);
             } else {
@@ -92,9 +92,16 @@ createCustomerQuery = (customer) => {
 
 createCustomer = async(req, res, next) => {
     const newCustomer = req.body;
+    const newCustomerPhone = req.body.Phone;
     
+    if(newCustomerPhone.length < 12 || newCustomerPhone.length > 12) {
+        var error = new Error('Phone must be 12 characters!');
+        error.status = 401;
+        return next(error);
+    }
+
     try {
-        const result = await createCustomerQuery(newCustomer);
+        await createCustomerQuery(newCustomer);
         res.status(201).send("New customer has been created");  
     } catch (error) {
         res.status(500).send(error.message);
@@ -110,7 +117,6 @@ updateCustomerQuery = (id, customer) => {
             if (error) {
                 reject(error);
             } else {
-                console.log(results)
                 if(results.affectedRows == 0) {
                     reject("There is no customer with that ID")
                 }

@@ -1,8 +1,8 @@
+const config = require('config');
 const con = require('../database');
 const { emailValidator } = require('../helper');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
-// const config = require('config');
 
 
 getAllUsersQuery = () => {
@@ -49,7 +49,8 @@ createUser = async(req, res, next) => {
     else {
         try {
             const userRequest = req.body;
-            const passHash = await bcrypt.hash(userRequest.Password, 10);
+            const salt = await bcrypt.genSalt(10)
+            const passHash = await bcrypt.hash(userRequest.Password, salt);
             await createUserQuery(userRequest, passHash);
             res.status(201).send("User has been created!");
         } catch (error) {
@@ -81,8 +82,8 @@ loginUser = async(req, res) => {
         var dbUser = user[0];
         const matchPass = bcrypt.compareSync(pass, dbUser.Password);
         if (matchPass) {
-            const token = jwt.sign({dbUser},'jwtPrivateKey', { expiresIn: '1h'});
-            res.header(token).status(200).json(token);        }
+            const token = jwt.sign({dbUser},'jwtPrivateKey', { expiresIn: '1h'});  //config.get('jwtPrivateKey')
+            res.header('x-auth-token',token).status(200).json("Welcome  " + dbUser.Email);        }
         else {
             res.status(401).send("Wrong password");
         }
@@ -93,8 +94,34 @@ loginUser = async(req, res) => {
 };
 
 
+deleteUserQuery = (userId) => {
+    const query = "DELETE FROM users WHERE Users_id = ?";
+    return new Promise((resolve,reject) => {
+        con.query(query,[userId],(error,results,fields) => {
+            if(error){
+                reject(error);
+            } else {
+                resolve(results);
+            }
+        })
+    })
+}
+
+deleteUser = async(req,res) => {
+    const userId = req.params.Users_id;
+
+    try {
+        await deleteUserQuery(userId);
+        res.status(200).send(`User with id ${userId} has been DELETED`);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+
+
 module.exports = {
     getAllUsers,
     loginUser,
-    createUser
+    createUser,
+    deleteUser
 };

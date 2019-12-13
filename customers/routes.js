@@ -14,8 +14,4 @@ routes.get('/customers/:Customer_id/orders', actions.getCustomerOrdersInfo);
 
 
 
-
-
-
-
 module.exports = routes;

@@ -4,8 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon web-api/app.js"
+    "test": "jest --watchAll --verbose",
+    "dev": "nodemon app.js",
+    "build": "babel helper.js -d babel"
   },
   "author": "",
   "license": "ISC",
@@ -15,8 +16,18 @@
     "config": "^3.2.4",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
     "mysql": "github:mysqljs/mysql"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.4",
+    "@babel/node": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "jest": "^24.9.0",
+    "supertest": "^4.0.2"
   }
 }
